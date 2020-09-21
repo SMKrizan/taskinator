@@ -1,13 +1,25 @@
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
 
-var createTaskHandler = function(event) {
+var createFormHandler = function (event) {
 
     event.preventDefault();
 
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
+    //package data as an object
+    var taskDataObj = {
+        name: taskNameInput,
+        type: taskTypeInput
+    };
+
+    // send object as an argument to createTaskEl
+    createTaskEl(taskDataObj);
+}
+
+// this function will be provided with both the task's title and type - we could set up two parameters, one for each piece of data, but this may require providing more info for each task, so instead we are settin up the function to accept an object as an argument.
+var createTaskEl = function (taskDataObj) {
     // create list item
     var taskItemEl = document.createElement("li");
     taskItemEl.className = "task-item";
@@ -17,14 +29,14 @@ var createTaskHandler = function(event) {
     // give newly created div a class name
     taskInfoEl.className = 'task-info';
     // add HTML content to newly created div; will be read as an HTML tag and rendered as an HTML element in the DOM; the h3 and span tags could also be created as separate variables and added individually as elements in the DOM
-    taskInfoEl.innerHTML = "<h3 class = 'task-name'>" + taskNameInput + "</h3><span class = 'task-type'>" + taskTypeInput + "</span>";
-    
+    taskInfoEl.innerHTML = "<h3 class = 'task-name'>" + taskDataObj.name + "</h3><span class = 'task-type'>" + taskDataObj.type + "</span>";
+
     taskItemEl.appendChild(taskInfoEl);
 
     // add entire list item to list
     tasksToDoEl.appendChild(taskItemEl);
 }
 
-formEl.addEventListener("submit", createTaskHandler);
+formEl.addEventListener("submit", createFormHandler);
 
 
