@@ -252,7 +252,21 @@ var dragTaskHandler = function(event) {
     // store the unique 'taskId' in the 'dataTransfer' property of the 'event' element using the 'setData' method, which takes two arguments: data format and data value.
     event.dataTransfer.setData("text/plain", taskId);
     var getId = event.dataTransfer.getData("text/plain");
+    // testing to verify the 'data-task-id' is stored successfully in the 'dattaTransfer' property object, with taskId reporting the unique numerical ID and the type of taskId reporting 'string'; because the drag and drop actions are both of the type 'DragEvent', we can access their properties during dragging and later during dropping.
     console.log("getId:", getId, typeof getId);
+}
+
+
+var dropZoneDragHandler = function(event) {
+    // // verify that the dragover event listener is working and check which element is being targeted
+    // console.log("Dragover Event Target:", event.target);
+    
+    var taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+        event.preventDefault();
+        console.dir(taskListEl);
+    }
+
 }
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
@@ -263,5 +277,8 @@ pageContentEl.addEventListener("change", taskStatusChangeHandler);
 
 // an event listener to facilitate task drag-and-drop
 pageContentEl.addEventListener("dragstart", dragTaskHandler);
+
+// an event listener for dragover event to <main>, the parent element of all three task lists. The 'dropZoneDragHandler' is passed as a callback if we included the () at the end it would immediately call the function.
+pageContentEl.addEventListener("dragover", dropZoneDragHandler);
 
 
