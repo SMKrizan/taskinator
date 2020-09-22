@@ -79,6 +79,9 @@ var createTaskEl = function (taskDataObj) {
     //add task id as a custom attribute
     taskItemEl.setAttribute("data-task-id", taskIdCounter);
 
+    // dynamically adding the 'draggable' attribute to tasks
+    taskItemEl.setAttribute("draggable", "true");
+
     // create div to hold task info and add to list item
     var taskInfoEl = document.createElement("div");
     // give newly created div a class name
@@ -236,10 +239,29 @@ else if (statusValue === "completed") {
 }
 };
 
+// 
+var dragTaskHandler = function(event) {
+    // // the 'event.target' DOM element is the task item element that has the 'data-task-id' attribute with numerical value unique to the task item being moved
+    // console.log("event.target:", event.target);
+    // // with this DOM element we can verify this as a 'dragstart' event
+    // console.log("event.type:", event.type);
+    var taskId = event.target.getAttribute("data-task-id");
+    // console.log("Task ID:", taskId);
+    // // within the DOM element 'event' is 'dataTransfer', a data storage property; we will save 'taskId' within this property using 'setData' and 'getData' methods
+    // console.log("event", event);
+    // store the unique 'taskId' in the 'dataTransfer' property of the 'event' element using the 'setData' method, which takes two arguments: data format and data value.
+    event.dataTransfer.setData("text/plain", taskId);
+    var getId = event.dataTransfer.getData("text/plain");
+    console.log("getId:", getId, typeof getId);
+}
+
 // an event listener for the 'edit', 'delete' and 'status' buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
 
 // an event listener for the 'status' button options
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
+
+// an event listener to facilitate task drag-and-drop
+pageContentEl.addEventListener("dragstart", dragTaskHandler);
 
 
