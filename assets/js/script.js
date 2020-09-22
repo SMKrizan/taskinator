@@ -1,5 +1,8 @@
-var taskIdCounter = 0;
+// set up for delegating click responsibility to the <main> element containing the DOM button elements
+var pageContentEl = document.querySelector("#page-content");
 
+var taskIdCounter = 0;
+// the document method 'querySelector' returns the first element within the document that matches the specified selector/s - if none found, returns 'null'
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
 
@@ -102,6 +105,40 @@ var createTaskActions = function(taskId) {
 
     return actionContainerEl;
 };
+
 formEl.addEventListener("submit", createFormHandler);
+
+var taskButtonHandler = function(event) {
+    // 'event.target' reports the element on which the event occurs e.g. the click event, in this case.
+    console.log(event.target);
+
+    // the 'matches' method works similarly to 'querySelector' except it checks to see if an element matches certain criteria and returns "true" if so and "false" if not, whereas 'querySelector' finds and returns an element.
+    if (event.target.matches(".delete-btn")) {
+        // // testing to see whether the matches method is working properly
+        // console.log("you clicked a delete button!");
+        // get the element's task id
+        var taskId = event.target.getAttribute("data-task-id");
+        // console.log(taskId);
+    }
+
+    if (event.target.matches(".delete-btn")) {
+        var taskId = event.target.getAttribute("data-task-id");
+        deleteTask(taskId);
+    }
+    
+};
+
+// a separate function to handle the deletion of tasks
+var deleteTask = function(taskId) {
+    // // another check to make sure the new function is reporting as expected
+    // console.log(taskId);
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    // // checking to see whether the correct task item is selected for deletion
+    // console.log(taskSelected);
+    taskSelected.remove()
+}
+
+// an event listener for the 'edit', 'delete' and 'status' buttons
+pageContentEl.addEventListener("click", taskButtonHandler);
 
 
