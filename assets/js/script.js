@@ -13,7 +13,7 @@ var tasksCompletedEl = document.querySelector("#tasks-completed");
 // setting up an empty array to hold task data as objects
 var tasks = [];
 
-var createFormHandler = function(event) {
+var createFormHandler = function (event) {
 
     event.preventDefault();
 
@@ -39,7 +39,7 @@ var createFormHandler = function(event) {
     // };
 
     // if 'isEdit' is true, this function will be called
-    var completeEditTask = function(taskName, taskType, taskId) {
+    var completeEditTask = function (taskName, taskType, taskId) {
         // // testing to see whether completeEditTask is working properly
         // console.log(taskName, taskType, taskId);
         //find the matching task list item
@@ -50,8 +50,8 @@ var createFormHandler = function(event) {
         taskSelected.querySelector("span.task-type").textContent = taskType;
 
         // loop through tasks array and task object with new content; since 'taskId' is a string and 'tasks[i].id' is a number we wrap taskId with parsInt() to convert it to a number for comparison. If the two ID values match, the the name and type properties will be updated.
-        for (var i=0; i<tasks.length; i++) {
-            if (tasks[i].id === parseInt(taskId)) {
+        for (var i = 0; i < tasks.length; i++) {
+            if (tasks[i].id === taskIdCounter) {
                 tasks[i].name = taskName;
                 tasks[i].type = taskType;
             }
@@ -126,7 +126,7 @@ var createTaskEl = function (taskDataObj) {
     // console.log(taskDataObj.status);
 }
 
-var createTaskActions = function(taskId) {
+var createTaskActions = function (taskId) {
     // this div will act as container for other elements
     var actionContainerEl = document.createElement("div");
     actionContainerEl.className = "task-actions";
@@ -160,7 +160,7 @@ var createTaskActions = function(taskId) {
     // these will provide the basis for the option elements to the select element dropdown; adding as an array makes it easy to add new options to this dropdown at a later date
     var statusChoices = ["To Do", "In Progress", "Completed"];
 
-    for (var i=0; i < statusChoices.length; i++) {
+    for (var i = 0; i < statusChoices.length; i++) {
         // create option element
         var statusOptionEl = document.createElement("option");
         statusOptionEl.textContent = statusChoices[i];
@@ -176,7 +176,7 @@ var createTaskActions = function(taskId) {
 formEl.addEventListener("submit", createFormHandler);
 
 //this function listens to events on the entire <main> element of the document
-var taskButtonHandler = function(event) {
+var taskButtonHandler = function (event) {
     // // 'event.target' reports the element on which the event occurs e.g. the click event, in this case.
     // console.log(event.target);
 
@@ -198,17 +198,17 @@ var taskButtonHandler = function(event) {
         var taskId = targetEl.getAttribute("data-task-id");
         // console.log(taskId);
         deleteTask(taskId);
-    }    
+    }
 };
 
 // a seperate function to handle task editing
-var editTask = function(taskId) {
+var editTask = function (taskId) {
     // // test to make sure the new elements are producing the expected results
     // console.log("editing task #" + taskId);
 
     // get task list item element
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
-    
+
     // get content from task name and type
     var taskName = taskSelected.querySelector("h3.task-name").textContent;
     // // testing to see whether the query is set up correctly
@@ -225,11 +225,11 @@ var editTask = function(taskId) {
 
     // add the 'taskId' to a 'data-task-id' attribute on the form itself; users will not see this attribute but it can be used later to save the correct task
     formEl.setAttribute("data-task-id", taskId);
-    console.log(formEl);
+    // console.log(formEl);
 };
 
 // a separate function to handle the deletion of tasks
-var deleteTask = function(taskId) {
+var deleteTask = function (taskId) {
     // // another check to make sure the new function is reporting as expected
     // console.log(taskId);
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
@@ -241,7 +241,7 @@ var deleteTask = function(taskId) {
     var updatedTaskArr = [];
 
     // loop through current tasks
-    for (var i=0; i<tasks.length; i++) {
+    for (var i = 0; i < tasks.length; i++) {
         // if tasks[i].id does not match the value of taskId, task is kept
         if (tasks[i].id !== parseInt(taskId)) {
             updatedTaskArr.push(tasks[i]);
@@ -255,42 +255,42 @@ var deleteTask = function(taskId) {
 }
 
 // a function to handle the changing of options within the 'status' button
-var taskStatusChangeHandler = function(event) {
-// // 'event.target' is a reference to a 'select' element, meaning we can use additional DOM methods to get this element's properties
-// console.log(event.target);
-// console.log(event.target.getAttribute("data-task-id"));
-// get the task item's id
-var taskId = event.target.getAttribute("data-task-id");
+var taskStatusChangeHandler = function (event) {
+    // // 'event.target' is a reference to a 'select' element, meaning we can use additional DOM methods to get this element's properties
+    // console.log(event.target);
+    // console.log(event.target.getAttribute("data-task-id"));
+    // get the task item's id
+    var taskId = event.target.getAttribute("data-task-id");
 
-// get the currently selected option's value and convert to lowercase - this may help down the road if we ever change how the status text is displayed; this way we'll always check against the lowercase version, code-wise.
-var statusValue = event.target.value.toLowerCase();
+    // get the currently selected option's value and convert to lowercase - this may help down the road if we ever change how the status text is displayed; this way we'll always check against the lowercase version, code-wise.
+    var statusValue = event.target.value.toLowerCase();
 
-// find the parent task item element based on the id
-var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
+    // find the parent task item element based on the id
+    var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
-// the following elements ('tasksToDoEl', 'tasksInProgressEl' and 'tasksCompletedEl') reference the <ul> elements created earlier; if user selects one of these from the dropdown, it will append the current task item to the <ul id="tasks-in-progress"> element with the 'tasksInProgressEl.appendChild(taskSelected)' method. Also note - using 'appendChild' here does not create a copy of the task, it moves the task from its original location in the DOM into the other <ul>. Also note - the 'taskSelected' didn't create a second <li>, it references an existing DOM element which we appended somewhere else.
-if (statusValue === "to do") {
-    tasksToDoEl.appendChild(taskSelected);
-}
-else if (statusValue === "in progress") {
-    tasksInProgressEl.appendChild(taskSelected);
-}
-else if (statusValue === "completed") {
-    tasksCompletedEl.appendChild(taskSelected);
-}
-
-// upate task status in tasks array
-for (var i=0; i<tasks.length; i++) {
-    if (tasks[i].id === parseInt(taskId)) {
-        tasks[i].status = statusValue;
+    // the following elements ('tasksToDoEl', 'tasksInProgressEl' and 'tasksCompletedEl') reference the <ul> elements created earlier; if user selects one of these from the dropdown, it will append the current task item to the <ul id="tasks-in-progress"> element with the 'tasksInProgressEl.appendChild(taskSelected)' method. Also note - using 'appendChild' here does not create a copy of the task, it moves the task from its original location in the DOM into the other <ul>. Also note - the 'taskSelected' didn't create a second <li>, it references an existing DOM element which we appended somewhere else.
+    if (statusValue === "to do") {
+        tasksToDoEl.appendChild(taskSelected);
     }
-    console.log(tasks);
-}
+    else if (statusValue === "in progress") {
+        tasksInProgressEl.appendChild(taskSelected);
+    }
+    else if (statusValue === "completed") {
+        tasksCompletedEl.appendChild(taskSelected);
+    }
 
-saveTasks()
+    // upate task status in tasks array
+    for (var i = 0; i < tasks.length; i++) {
+        if (tasks[i].id === parseInt(taskId)) {
+            tasks[i].status = statusValue;
+        }
+        // console.log(tasks);
+    }
+
+    saveTasks()
 };
 
-var dragTaskHandler = function(event) {
+var dragTaskHandler = function (event) {
     // // the 'event.target' DOM element is the task item element that has the 'data-task-id' attribute with numerical value unique to the task item being moved
     // console.log("event.target:", event.target);
     // // with this DOM element we can verify this as a 'dragstart' event
@@ -302,11 +302,11 @@ var dragTaskHandler = function(event) {
     // store the unique 'taskId' in the 'dataTransfer' property of the 'event' element using the 'setData' method, which takes two arguments: data format and data value.
     event.dataTransfer.setData("text/plain", taskId);
     var getId = event.dataTransfer.getData("text/plain");
-    // testing to verify the 'data-task-id' is stored successfully in the 'dattaTransfer' property object, with taskId reporting the unique numerical ID and the type of taskId reporting 'string'; because the drag and drop actions are both of the type 'DragEvent', we can access their properties during dragging and later during dropping.
-    console.log("getId:", getId, typeof getId);
+    // // testing to verify the 'data-task-id' is stored successfully in the 'dattaTransfer' property object, with taskId reporting the unique numerical ID and the type of taskId reporting 'string'; because the drag and drop actions are both of the type 'DragEvent', we can access their properties during dragging and later during dropping.
+    // console.log("getId:", getId, typeof getId);
 }
 
-var dropZoneDragHandler = function(event) {
+var dropZoneDragHandler = function (event) {
     // // verify that the dragover event listener is working and check which element is being targeted
     // console.log("Dragover Event Target:", event.target);
     // this limits the droppable area to be the task list or a child element thereof
@@ -321,7 +321,7 @@ var dropZoneDragHandler = function(event) {
     }
 }
 
-var dropTaskHandler = function(event) {
+var dropTaskHandler = function (event) {
     // the 'data'task'id' value was stored in the 'dataTransfer' property using the 'setData' method, and now it is being retrieved using the 'getData' method
     var id = event.dataTransfer.getData("text/plain");
     // // testing to ensure the unique task id is identified and drop destination are identified properly
@@ -356,7 +356,7 @@ var dropTaskHandler = function(event) {
     dropZoneEl.appendChild(draggableElement);
 
     //loop through tasks array to find and update task status
-    for (var i=0; i<tasks.length; i++) {
+    for (var i = 0; i < tasks.length; i++) {
         if (tasks[i].id === parseInt(id)) {
             tasks[i].status = statusSelectEl.value.toLowerCase();
         }
@@ -365,7 +365,7 @@ var dropTaskHandler = function(event) {
 }
 
 // delegating dragLeave to the parent of the three task lists
-var dragLeaveHandler = function(event) {
+var dragLeaveHandler = function (event) {
     // // displays 'dragLeave' DOM element which stores every element that dragged task item has been dragged over but no longer actively dragged on 
     // console.dir(event.target);
     // should execute only when dragged element leaves a task list or child thereof 
@@ -376,10 +376,59 @@ var dragLeaveHandler = function(event) {
 }
 
 // saving the packaged task info array to localStorage, which can only read strings, so data is converted via JavaScriptObjectNotation (JSON)
-var saveTasks = function() {
+var saveTasks = function () {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
+// function to get tasks from localStorage, convert from string format back into an array of objects and iterates through tasks array to create the elements on the page
+var loadTasks = function () {
+    // get tasks from localStorage and accounting for the condition where there are no saved tasks
+    tasks = localStorage.getItem("tasks");
+    // console.log(tasks);
+    if (tasks === null) {
+        tasks = [];
+        return false;
+    }
+    // convert from string to an array of objects
+    tasks = JSON.parse(tasks);
+    // console.log(tasks);
+
+    // iterate through tasks array to create elements on the page
+    for (i = 0; i < tasks.length; i++) {
+        // console.log(tasks[i]);
+
+        var listItemEl = document.createElement("li");
+        listItemEl.className = "task-item";
+        listItemEl.setAttribute("data-task-id", tasks[i].id);
+        listItemEl.setAttribute("draggable", "true");
+        // console.log(listItemEl);
+
+        var taskInfoEl = document.createElement("div");
+        taskInfoEl.className = "task-info";
+        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[i].name + "</h3><span class='task-type'>" + tasks[i].type + "</span>";
+        listItemEl.appendChild(taskInfoEl);
+
+        var taskActionsEl = createTaskActions(tasks[i].id)
+        listItemEl.appendChild(taskActionsEl);
+        // console.log(listItemEl);
+
+        if (tasks[i].status === "to do") {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
+            listItemEl.appendChild(tasksToDoEl);
+        }
+        else if (tasks[i].status === "in progress") {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
+            listItemEl.appendChild(tasksInProgressEl);
+        }
+        else if (tasks[i].status === "complete") {
+            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
+            listItemEl.appendChild(tasksCompletedEl);
+        }
+        taskIdCounter ++;
+        console.log(listItemEl);
+    }
+
+}
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
@@ -397,4 +446,4 @@ pageContentEl.addEventListener("drop", dropTaskHandler);
 
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
 
-
+loadTasks()
