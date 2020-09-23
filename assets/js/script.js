@@ -10,6 +10,9 @@ var tasksToDoEl = document.querySelector("#tasks-to-do");
 var tasksInProgressEl = document.querySelector("#tasks-in-progress");
 var tasksCompletedEl = document.querySelector("#tasks-completed");
 
+// setting up an empty array to hold task data as objects
+var tasks = [];
+
 var createFormHandler = function(event) {
 
     event.preventDefault();
@@ -28,11 +31,12 @@ var createFormHandler = function(event) {
     // will let us know whether an element has a certain attribute, in this case, upon clicking the 'add task/edit task' button it will tell us whether the task is a new or edited (old) task.
     var isEdit = formEl.hasAttribute("data-task-id");
 
-    //package data as an object
-    var taskDataObj = {
-        name: taskNameInput,
-        type: taskTypeInput
-    };
+    // //package data as an object
+    // var taskDataObj = {
+    //     name: taskNameInput,
+    //     type: taskTypeInput,
+    //     status: "to do",
+    // };
 
     // if 'isEdit' is true, this function will be called
     var completeEditTask = function(taskName, taskType, taskId) {
@@ -44,6 +48,16 @@ var createFormHandler = function(event) {
         // set new values; note: 'h3.task-name' will yield a different query result from 'h3 .task-name'. The former will look for ,h3. elements with a class of 'task-name', whereas the latter will look for elements with a class of 'task-name' that are descendent elements of an <h3> element.
         taskSelected.querySelector("h3.task-name").textContent = taskName;
         taskSelected.querySelector("span.task-type").textContent = taskType;
+
+        debugger
+        // loop through tasks array and task object with new content; since 'taskId' is a string and 'tasks[i].id' is a number we wrap taskId with parsInt() to convert it to a number for comparison. If the two ID values match, the the name and type properties will be updated.
+        for (var i=0; i<tasks.length; i++) {
+            if (tasks[i].id === parseInt(taskId)) {
+                tasks[i].name = taskName;
+                tasks[i].type = taskType;
+            }
+        }
+        debugger
 
         alert("Task Updated!");
 
@@ -63,7 +77,8 @@ var createFormHandler = function(event) {
     else {
         var taskDataObj = {
             name: taskNameInput,
-            type: taskTypeInput
+            type: taskTypeInput,
+            status: "to do"
         };
 
         createTaskEl(taskDataObj);
@@ -97,8 +112,16 @@ var createTaskEl = function (taskDataObj) {
     // add entire list item to list
     tasksToDoEl.appendChild(taskItemEl);
 
+    // adding value of ID as a property to the 'taskDataObj' argument variable and adding entire oject to the tasks array; will use this ID to identify which task has changed for both the DOM and the 'tasks' array. The 'push' method adds any content between the parentheses to the end of the specified array ('tasks').
+    taskDataObj.id = taskIdCounter;
+    tasks.push(taskDataObj);
+
     //increase task counter for next unique id
     taskIdCounter++;
+
+    // testing whether 'taskDataObj' contains/displays all desired data
+    console.log(taskDataObj);
+    console.log(taskDataObj.status);
 }
 
 var createTaskActions = function(taskId) {
@@ -211,6 +234,20 @@ var deleteTask = function(taskId) {
     // // checking to see whether the correct task item is selected for deletion
     // console.log(taskSelected);
     taskSelected.remove()
+
+    // create new array to hold updated list of tasks
+    var updatedTaskArr = [];
+
+    // loop through current tasks
+    for (var i=0; i<tasks.length; i++) {
+        // if tasks[i].id does not match the value of taskId, task is kept
+        if (tasks[i].id !== parseInt(taskId)) {
+            updatedTaskArr.push(tasks[i]);
+        }
+    }
+
+    // when updating task info all we have to to is overwrite the info, but to delete we have to create a new array of tasks that does not include the deleted task; reassign tasks array to be the same as updatedTaskArr
+    tasks = updatedTaskArr;
 }
 
 // a function to handle the changing of options within the 'status' button
@@ -236,6 +273,14 @@ else if (statusValue === "in progress") {
 }
 else if (statusValue === "completed") {
     tasksCompletedEl.appendChild(taskSelected);
+}
+
+// upate task status in tasks array
+for (var i=0; i<tasks.length; i++) {
+    if (tasks[i].id === parseInt(taskId)) {
+        tasks[i].status = statusValue;
+    }
+    console.log(tasks);
 }
 };
 
@@ -303,13 +348,21 @@ var dropTaskHandler = function(event) {
     // removes dragover styling just before task item is attached to new task list
     dropZoneEl.removeAttribute("style");
     dropZoneEl.appendChild(draggableElement);
+
+    //loop through tasks array to find and update task status
+    for (var i=0; i<tasks.length; i++) {
+        if (tasks[i].id === parseInt(id)) {
+            tasks[i].status = statusSelectEl.value.toLowerCase();
+        }
+    }
+    console.log(tasks);
 }
 
 // delegating dragLeave to the parent of the three task lists
 var dragLeaveHandler = function(event) {
     // // displays 'dragLeave' DOM element which stores every element that dragged task item has been dragged over but no longer actively dragged on 
     // console.dir(event.target);
-    // should execute only when dragged element leaves a task list or child thereof
+    // should execute only when dragged element leaves a task list or child thereof 
     var taskListEl = event.target.closest(".task-list");
     if (taskListEl) {
         taskListEl.removeAttribute("style");
