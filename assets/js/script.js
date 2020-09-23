@@ -49,7 +49,6 @@ var createFormHandler = function(event) {
         taskSelected.querySelector("h3.task-name").textContent = taskName;
         taskSelected.querySelector("span.task-type").textContent = taskType;
 
-        debugger
         // loop through tasks array and task object with new content; since 'taskId' is a string and 'tasks[i].id' is a number we wrap taskId with parsInt() to convert it to a number for comparison. If the two ID values match, the the name and type properties will be updated.
         for (var i=0; i<tasks.length; i++) {
             if (tasks[i].id === parseInt(taskId)) {
@@ -57,7 +56,8 @@ var createFormHandler = function(event) {
                 tasks[i].type = taskType;
             }
         }
-        debugger
+
+        saveTasks()
 
         alert("Task Updated!");
 
@@ -116,12 +116,14 @@ var createTaskEl = function (taskDataObj) {
     taskDataObj.id = taskIdCounter;
     tasks.push(taskDataObj);
 
+    saveTasks()
+
     //increase task counter for next unique id
     taskIdCounter++;
 
-    // testing whether 'taskDataObj' contains/displays all desired data
-    console.log(taskDataObj);
-    console.log(taskDataObj.status);
+    // // testing whether 'taskDataObj' contains/displays all desired data
+    // console.log(taskDataObj);
+    // console.log(taskDataObj.status);
 }
 
 var createTaskActions = function(taskId) {
@@ -248,6 +250,8 @@ var deleteTask = function(taskId) {
 
     // when updating task info all we have to to is overwrite the info, but to delete we have to create a new array of tasks that does not include the deleted task; reassign tasks array to be the same as updatedTaskArr
     tasks = updatedTaskArr;
+
+    saveTasks()
 }
 
 // a function to handle the changing of options within the 'status' button
@@ -282,6 +286,8 @@ for (var i=0; i<tasks.length; i++) {
     }
     console.log(tasks);
 }
+
+saveTasks()
 };
 
 var dragTaskHandler = function(event) {
@@ -355,7 +361,7 @@ var dropTaskHandler = function(event) {
             tasks[i].status = statusSelectEl.value.toLowerCase();
         }
     }
-    console.log(tasks);
+    saveTasks()
 }
 
 // delegating dragLeave to the parent of the three task lists
@@ -368,6 +374,12 @@ var dragLeaveHandler = function(event) {
         taskListEl.removeAttribute("style");
     }
 }
+
+// saving the packaged task info array to localStorage, which can only read strings, so data is converted via JavaScriptObjectNotation (JSON)
+var saveTasks = function() {
+    localStorage.setItem("tasks", JSON.stringify(tasks));
+}
+
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
