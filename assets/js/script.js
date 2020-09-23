@@ -239,7 +239,6 @@ else if (statusValue === "completed") {
 }
 };
 
-// 
 var dragTaskHandler = function(event) {
     // // the 'event.target' DOM element is the task item element that has the 'data-task-id' attribute with numerical value unique to the task item being moved
     // console.log("event.target:", event.target);
@@ -256,17 +255,49 @@ var dragTaskHandler = function(event) {
     console.log("getId:", getId, typeof getId);
 }
 
-
 var dropZoneDragHandler = function(event) {
     // // verify that the dragover event listener is working and check which element is being targeted
     // console.log("Dragover Event Target:", event.target);
-    
+    // this limits the droppable area to be the task list or a child element thereof
     var taskListEl = event.target.closest(".task-list");
     if (taskListEl) {
         event.preventDefault();
-        console.dir(taskListEl);
+        // // verify the drop area
+        // console.dir(taskListEl);
+    }
+}
+
+var dropTaskHandler = function(event) {
+    // the 'data'task'id' value was stored in the 'dataTransfer' property using the 'setData' method, and now it is being retrieved using the 'getData' method
+    var id = event.dataTransfer.getData("text/plain");
+    // // testing to ensure the unique task id is identified and drop destination are identified properly
+    // console.log("Drop Event Target:", event.target, event.dataTransfer, id);
+    var draggableElement = document.querySelector("[data-task-id='" + id + "']");
+    // // using 'querySelector' method on 'data-task-id' attribute to locate dragged task item with unique task ID and then confirm that it is stored within the dataTransfer object
+    // console.log(draggableElement);
+    // console.dir(draggableElement);
+    // using 'closest' method to return corresponding task list element of the drop zone 
+    var dropZoneEl = event.target.closest(".task-list");
+    // use 'id' property of task list element to retrieve 'id' attribute to and identify which task list was dropped on, to designate task status
+    var statusType = dropZoneEl.id;
+    // console.log(statusType);
+    // console.dir(dropZoneEl);
+    //set status of task based on dropZone id; note the use of 'draggableElement' rather than 'document' as the reference point of the 'querySelector' method; 'document' would choose the first of all task items in the DOM tree, rather than specifically the one that needs to change, which is the one that was dragged.
+    var statusSelectEl = draggableElement.querySelector("select[name='status-change']");
+    // console.dir(statusSelectEl);
+    // console.log(statusSelectEl);
+    // using 'selectedIndex' property to map the 'status' option to a list value by specifying the option's position in order to assign the appropriate status value.
+    if (statusType === "tasks-to-do") {
+        statusSelectEl.selectedIndex = 0;
+    }
+    else if (statusType === "tasks-in-progress") {
+        statusSelectEl.selectedIndex = 1;
+    }
+    else if (statusType === "tasks-completed") {
+        statusSelectEl.selectedIndex = 2;
     }
 
+    dropZoneEl.appendChild(draggableElement);
 }
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
@@ -280,5 +311,7 @@ pageContentEl.addEventListener("dragstart", dragTaskHandler);
 
 // an event listener for dragover event to <main>, the parent element of all three task lists. The 'dropZoneDragHandler' is passed as a callback if we included the () at the end it would immediately call the function.
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
+
+pageContentEl.addEventListener("drop", dropTaskHandler);
 
 
