@@ -1,7 +1,7 @@
+var taskIdCounter = 0;
+
 // set up for delegating click responsibility to the <main> element containing the DOM button elements
 var pageContentEl = document.querySelector("#page-content");
-
-var taskIdCounter = 0;
 // the document method 'querySelector' returns the first element within the document that matches the specified selector/s - if none found, returns 'null'
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
@@ -30,13 +30,6 @@ var createFormHandler = function (event) {
 
     // will let us know whether an element has a certain attribute, in this case, upon clicking the 'add task/edit task' button it will tell us whether the task is a new or edited (old) task.
     var isEdit = formEl.hasAttribute("data-task-id");
-
-    // //package data as an object
-    // var taskDataObj = {
-    //     name: taskNameInput,
-    //     type: taskTypeInput,
-    //     status: "to do",
-    // };
 
     // if 'isEdit' is true, this function will be called
     var completeEditTask = function (taskName, taskType, taskId) {
@@ -173,8 +166,6 @@ var createTaskActions = function (taskId) {
     return actionContainerEl;
 };
 
-formEl.addEventListener("submit", createFormHandler);
-
 //this function listens to events on the entire <main> element of the document
 var taskButtonHandler = function (event) {
     // // 'event.target' reports the element on which the event occurs e.g. the click event, in this case.
@@ -188,7 +179,6 @@ var taskButtonHandler = function (event) {
         var taskId = targetEl.getAttribute("data-task-id");
         editTask(taskId);
     }
-
 
     // DELETE BUTTON was clicked; the 'matches' method works similarly to 'querySelector' except it checks to see if an element matches certain criteria and returns "true" if so and "false" if not, whereas 'querySelector' finds and returns an element.
     else if (targetEl.matches(".delete-btn")) {
@@ -284,9 +274,7 @@ var taskStatusChangeHandler = function (event) {
         if (tasks[i].id === parseInt(taskId)) {
             tasks[i].status = statusValue;
         }
-        // console.log(tasks);
     }
-
     saveTasks()
 };
 
@@ -340,6 +328,7 @@ var dropTaskHandler = function (event) {
     var statusSelectEl = draggableElement.querySelector("select[name='status-change']");
     // console.dir(statusSelectEl);
     // console.log(statusSelectEl);
+
     // using 'selectedIndex' property to map the 'status' option to a list value by specifying the option's position in order to assign the appropriate status value.
     if (statusType === "tasks-to-do") {
         statusSelectEl.selectedIndex = 0;
@@ -382,68 +371,33 @@ var saveTasks = function () {
 
 // function to get tasks from localStorage, convert from string format back into an array of objects and iterates through tasks array to create the elements on the page
 var loadTasks = function () {
-    // get tasks from localStorage and accounting for the condition where there are no saved tasks
-    tasks = localStorage.getItem("tasks");
-    // console.log(tasks);
-    if (tasks === null) {
-        tasks = [];
+    // get tasks from localStorage and account for the condition where there are no saved tasks
+    var savedTasks = localStorage.getItem("tasks");
+    
+    if (savedTasks === null) {
         return false;
     }
     // convert from string to an array of objects
-    tasks = JSON.parse(tasks);
-    // console.log(tasks);
+    savedTasks = JSON.parse(savedTasks);
 
     // iterate through tasks array to create elements on the page
-    for (i = 0; i < tasks.length; i++) {
-        // console.log(tasks[i]);
-
-        var listItemEl = document.createElement("li");
-        listItemEl.className = "task-item";
-        listItemEl.setAttribute("data-task-id", tasks[i].id);
-        listItemEl.setAttribute("draggable", "true");
-        // console.log(listItemEl);
-
-        var taskInfoEl = document.createElement("div");
-        taskInfoEl.className = "task-info";
-        taskInfoEl.innerHTML = "<h3 class='task-name'>" + tasks[i].name + "</h3><span class='task-type'>" + tasks[i].type + "</span>";
-        listItemEl.appendChild(taskInfoEl);
-
-        var taskActionsEl = createTaskActions(tasks[i].id)
-        listItemEl.appendChild(taskActionsEl);
-        // console.log(listItemEl);
-
-        if (tasks[i].status === "to do") {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 0;
-            listItemEl.appendChild(tasksToDoEl);
-        }
-        else if (tasks[i].status === "in progress") {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 1;
-            listItemEl.appendChild(tasksInProgressEl);
-        }
-        else if (tasks[i].status === "complete") {
-            listItemEl.querySelector("select[name='status-change']").selectedIndex = 2;
-            listItemEl.appendChild(tasksCompletedEl);
-        }
-        taskIdCounter ++;
-        console.log(listItemEl);
+    for (var i = 0; i < savedTasks.length; i++) {
+    // pass each task object into the 'createTaskEl()' function
+    createTaskEl(savedTasks[i]);
     }
-
 }
+
+formEl.addEventListener("submit", createFormHandler);
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
-
 // an event listener for the 'status' button options
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
-
 // an event listener to facilitate task drag-and-drop
 pageContentEl.addEventListener("dragstart", dragTaskHandler);
-
 // an event listener for dragover event to <main>, the parent element of all three task lists. The 'dropZoneDragHandler' is passed as a callback if we included the () at the end it would immediately call the function.
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
-
 pageContentEl.addEventListener("drop", dropTaskHandler);
-
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
 
 loadTasks()
