@@ -264,6 +264,9 @@ var dropZoneDragHandler = function(event) {
         event.preventDefault();
         // // verify the drop area
         // console.dir(taskListEl);
+
+        // adding styling to the drop zone in order to signal to the user where the tasks can be placed
+        taskListEl.setAttribute("style", "background: rgba(68, 233, 255, 0.7); border-style: dashed;");
     }
 }
 
@@ -297,7 +300,20 @@ var dropTaskHandler = function(event) {
         statusSelectEl.selectedIndex = 2;
     }
 
+    // removes dragover styling just before task item is attached to new task list
+    dropZoneEl.removeAttribute("style");
     dropZoneEl.appendChild(draggableElement);
+}
+
+// delegating dragLeave to the parent of the three task lists
+var dragLeaveHandler = function(event) {
+    // // displays 'dragLeave' DOM element which stores every element that dragged task item has been dragged over but no longer actively dragged on 
+    // console.dir(event.target);
+    // should execute only when dragged element leaves a task list or child thereof
+    var taskListEl = event.target.closest(".task-list");
+    if (taskListEl) {
+        taskListEl.removeAttribute("style");
+    }
 }
 
 // an event listener for the 'edit', 'delete' and 'status' buttons
@@ -313,5 +329,7 @@ pageContentEl.addEventListener("dragstart", dragTaskHandler);
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
 
 pageContentEl.addEventListener("drop", dropTaskHandler);
+
+pageContentEl.addEventListener("dragleave", dragLeaveHandler);
 
 
