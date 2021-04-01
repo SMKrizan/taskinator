@@ -1,12 +1,10 @@
 var taskIdCounter = 0;
 
-// set up for delegating click responsibility to the <main> element containing the DOM button elements
+// 'querySelector' document method returns 1st element within the document that matches specified selector/s - if none found, returns 'null'
+// 'pageContentEl' delegates click responsibility to <main> element that will contain DOM button elements
 var pageContentEl = document.querySelector("#page-content");
-// the document method 'querySelector' returns the first element within the document that matches the specified selector/s - if none found, returns 'null'
 var formEl = document.querySelector("#task-form");
 var tasksToDoEl = document.querySelector("#tasks-to-do");
-
-// two variables for interacting with 'Tasks in Progress' and 'Tasks Completed' columns
 var tasksInProgressEl = document.querySelector("#tasks-in-progress");
 var tasksCompletedEl = document.querySelector("#tasks-completed");
 
@@ -14,9 +12,9 @@ var tasksCompletedEl = document.querySelector("#tasks-completed");
 var tasks = [];
 
 var createFormHandler = function (event) {
-
+    // prevents legacy browser behavior e.g. auto page-reloading
     event.preventDefault();
-
+    // square brackets in a selector indicate selection of an element by one of its attributes
     var taskNameInput = document.querySelector("input[name='task-name']").value;
     var taskTypeInput = document.querySelector("select[name='task-type']").value;
 
@@ -25,24 +23,24 @@ var createFormHandler = function (event) {
         alert("Please enter a task into the task form!");
         return false;
     }
-
+    // calls function which resets form fields following each submission
     formEl.reset();
 
-    // will let us know whether an element has a certain attribute, in this case, upon clicking the 'add task/edit task' button it will tell us whether the task is a new or edited (old) task.
+    // lets us know whether an element has a certain attribute, in this case, upon clicking the 'add task/edit task' button it will tell us whether the task is a new or edited (old) task.
     var isEdit = formEl.hasAttribute("data-task-id");
 
     // if 'isEdit' is true, this function will be called
     var completeEditTask = function (taskName, taskType, taskId) {
-        // // testing to see whether completeEditTask is working properly
+        // tests whether 'completeEditTask' works properly
         // console.log(taskName, taskType, taskId);
-        //find the matching task list item
+        //finds matching task list item
         var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
-        // set new values; note: 'h3.task-name' will yield a different query result from 'h3 .task-name'. The former will look for ,h3. elements with a class of 'task-name', whereas the latter will look for elements with a class of 'task-name' that are descendent elements of an <h3> element.
+        // sets new values; note: 'h3.task-name' yields a different query result than 'h3 .task-name'. The former will look for an h3. element with a class of 'task-name', whereas the latter will look for an element with class of 'task-name' that is a descendent element of an <h3> element.
         taskSelected.querySelector("h3.task-name").textContent = taskName;
         taskSelected.querySelector("span.task-type").textContent = taskType;
 
-        // loop through tasks array and task object with new content; since 'taskId' is a string and 'tasks[i].id' is a number we wrap taskId with parsInt() to convert it to a number for comparison. If the two ID values match, the the name and type properties will be updated.
+        // loops through tasks array and task object with new content; since 'taskId' is a string and 'tasks[i].id' is a number we wrap taskId with parsInt() to convert it to a number for comparison. If the two ID values match, the the name and type properties will be updated.
         for (var i = 0; i < tasks.length; i++) {
             if (tasks[i].id === taskIdCounter) {
                 tasks[i].name = taskName;
@@ -54,58 +52,53 @@ var createFormHandler = function (event) {
 
         alert("Task Updated!");
 
-        // reset task entry form by removing task ID and changing the button text back to 'add task' from 'edit task'
+        // resets task entry form by removing task ID and changing the button text back to 'add task' from 'edit task'
         formEl.removeAttribute("data-task-id");
         document.querySelector("#save-task").textContent = "Add Task";
     };
 
-    // wraps the 'createTaskEl' call and 'taskDataObj' variable in an if/else statement
-    // has data attribute, so get task id and call function to complete edit process
     if (isEdit) {
         var taskId = formEl.getAttribute("data-task-id");
         completeEditTask(taskNameInput, taskTypeInput, taskId);
     }
-
-    // no data attribute ('isEdit" is false), so create object as normal and pass to 'createTaskEl' function
     else {
         var taskDataObj = {
             name: taskNameInput,
             type: taskTypeInput,
             status: "to do"
         };
-
         createTaskEl(taskDataObj);
     }
 }
 
-// this function will be provided with both the task's title and type - we could set up two parameters, one for each piece of data, but this may require providing more info for each task, so instead we are settin up the function to accept an object as an argument.
+// function is provided task's title and type within 'taskDataObj' as an argument, rather than passing two parameters, one for each piece of data.
 var createTaskEl = function (taskDataObj) {
-    // create list item
+    // creates list item
     var taskItemEl = document.createElement("li");
     taskItemEl.className = "task-item";
 
-    //add task id as a custom attribute
+    //adds task id as a custom attribute
     taskItemEl.setAttribute("data-task-id", taskIdCounter);
 
-    // dynamically adding the 'draggable' attribute to tasks
+    // dynamically adds 'draggable' attribute to tasks
     taskItemEl.setAttribute("draggable", "true");
 
-    // create div to hold task info and add to list item
+    // creates div to hold task info and add to list item
     var taskInfoEl = document.createElement("div");
-    // give newly created div a class name
+    // gives class name to newly created div 
     taskInfoEl.className = 'task-info';
-    // add HTML content to newly created div; will be read as an HTML tag and rendered as an HTML element in the DOM; the h3 and span tags could also be created as separate variables and added individually as elements in the DOM
+    // adds HTML content to newly created div; will be read as an HTML tag and rendered as an HTML element in the DOM
     taskInfoEl.innerHTML = "<h3 class = 'task-name'>" + taskDataObj.name + "</h3><span class = 'task-type'>" + taskDataObj.type + "</span>";
     taskItemEl.appendChild(taskInfoEl);
 
-    // we're using 'taskIdCounter' as the argument to create buttons that correspond to the current task ID; 'createTaskActions' returns a DOM element which is being stored in the variable 'taskActionsEl'
+    // uses 'taskIdCounter' as argument to create buttons corresponding to current task ID; 'createTaskActions' returns a DOM element which is stored in the variable 'taskActionsEl'
     var taskActionsEl = createTaskActions(taskIdCounter);
     taskItemEl.appendChild(taskActionsEl);
 
     // add entire list item to list
     tasksToDoEl.appendChild(taskItemEl);
 
-    // adding value of ID as a property to the 'taskDataObj' argument variable and adding entire oject to the tasks array; will use this ID to identify which task has changed for both the DOM and the 'tasks' array. The 'push' method adds any content between the parentheses to the end of the specified array ('tasks').
+    // adds value of ID as a property to the 'taskDataObj' argument variable and adds entire oject to tasks array; will use this ID to identify which task has changed for both the DOM and the 'tasks' array. The 'push' method adds any content between the parentheses to the end of the specified array ('tasks').
     taskDataObj.id = taskIdCounter;
     tasks.push(taskDataObj);
 
@@ -114,35 +107,35 @@ var createTaskEl = function (taskDataObj) {
     //increase task counter for next unique id
     taskIdCounter++;
 
-    // // testing whether 'taskDataObj' contains/displays all desired data
+    // // tests whether 'taskDataObj' contains/displays all desired data
     // console.log(taskDataObj);
     // console.log(taskDataObj.status);
 }
 
 var createTaskActions = function (taskId) {
-    // this div will act as container for other elements
+    // acts as container for other elements
     var actionContainerEl = document.createElement("div");
     actionContainerEl.className = "task-actions";
 
-    // create edit button
+    // creates edit button
     var editButtonEl = document.createElement("button");
     editButtonEl.textContent = "Edit";
     editButtonEl.className = "btn edit-btn";
     editButtonEl.setAttribute("data-task-id", taskId);
 
-    // adds edit button to the div
+    // adds edit button to div
     actionContainerEl.appendChild(editButtonEl);
 
-    //create delete button
+    //creates delete button
     var deleteButtonEl = document.createElement("button");
     deleteButtonEl.textContent = "Delete";
     deleteButtonEl.className = "btn delete-btn";
     deleteButtonEl.setAttribute("data-task-id", taskId);
 
-    // adds delete button to the div
+    // adds delete button to div
     actionContainerEl.appendChild(deleteButtonEl);
 
-    // this will add an empty select element to the div; the option elements will come next
+    // adds empty select element to div
     var statusSelectEl = document.createElement("select");
     statusSelectEl.className = "select-status";
     statusSelectEl.setAttribute("Name", "status-change");
@@ -150,16 +143,16 @@ var createTaskActions = function (taskId) {
 
     actionContainerEl.appendChild(statusSelectEl);
 
-    // these will provide the basis for the option elements to the select element dropdown; adding as an array makes it easy to add new options to this dropdown at a later date
+    // provides the basis for option elements to the select element dropdown; adding as an array makes it easy to add new options to this dropdown at a later date
     var statusChoices = ["To Do", "In Progress", "Completed"];
 
     for (var i = 0; i < statusChoices.length; i++) {
-        // create option element
+        // creates option element
         var statusOptionEl = document.createElement("option");
         statusOptionEl.textContent = statusChoices[i];
         statusOptionEl.setAttribute("value", statusChoices[i]);
 
-        // append to select
+        // appends to select
         statusSelectEl.appendChild(statusOptionEl);
     }
 
@@ -168,7 +161,7 @@ var createTaskActions = function (taskId) {
 
 //this function listens to events on the entire <main> element of the document
 var taskButtonHandler = function (event) {
-    // // 'event.target' reports the element on which the event occurs e.g. the click event, in this case.
+    // // 'event.target' reports the element on which the event occurs e.g. the click event
     // console.log(event.target);
 
     // get target element from event
@@ -180,57 +173,57 @@ var taskButtonHandler = function (event) {
         editTask(taskId);
     }
 
-    // DELETE BUTTON was clicked; the 'matches' method works similarly to 'querySelector' except it checks to see if an element matches certain criteria and returns "true" if so and "false" if not, whereas 'querySelector' finds and returns an element.
+    // DELETE BUTTON was clicked; the 'matches' method works similarly to 'querySelector' except its response is boolean, whereas 'querySelector' finds and returns an element.
     else if (targetEl.matches(".delete-btn")) {
-        // // testing to see whether the matches method is working properly
+        // // tests whether 'matches' method is working properly
         // console.log("you clicked a delete button!");
-        // get the element's task id
+        // gets element's task id
         var taskId = targetEl.getAttribute("data-task-id");
         // console.log(taskId);
         deleteTask(taskId);
     }
 };
 
-// a seperate function to handle task editing
+// handles task editing
 var editTask = function (taskId) {
-    // // test to make sure the new elements are producing the expected results
+    // // tests whether new elements are producing expected results
     // console.log("editing task #" + taskId);
 
-    // get task list item element
+    // gets task list item element
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
-    // get content from task name and type
+    // gets content from task name and type
     var taskName = taskSelected.querySelector("h3.task-name").textContent;
-    // // testing to see whether the query is set up correctly
+    // // tests whether the query is set up correctly
     // console.log(taskName);
 
     var taskType = taskSelected.querySelector("span.task-type").textContent;
-    // // testing to see whether the query is set up correctly
+    // // tests whether the query is set up correctly
     // console.log(taskType);
 
     document.querySelector("input[name='task-name']").value = taskName;
     document.querySelector("select[name='task-type']").value = taskType;
-    // the 'add task' button will change to 'save task' once the 'edit' button has been clicked
+    // 'add task' button will change to 'save task' once the 'edit' button has been clicked
     document.querySelector("#save-task").textContent = "Save Task";
 
-    // add the 'taskId' to a 'data-task-id' attribute on the form itself; users will not see this attribute but it can be used later to save the correct task
+    // uses 'taskId' to create 'data-task-id' attribute on the form in order save the correct task
     formEl.setAttribute("data-task-id", taskId);
     // console.log(formEl);
 };
 
-// a separate function to handle the deletion of tasks
+// handles task deletion
 var deleteTask = function (taskId) {
-    // // another check to make sure the new function is reporting as expected
+    // // checks whether new function is reporting as expected
     // console.log(taskId);
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
-    // // checking to see whether the correct task item is selected for deletion
+    // // checks whether correct task item is selected for deletion
     // console.log(taskSelected);
     taskSelected.remove()
 
-    // create new array to hold updated list of tasks
+    // creates new array to hold updated list of tasks
     var updatedTaskArr = [];
 
-    // loop through current tasks
+    // loops through current tasks
     for (var i = 0; i < tasks.length; i++) {
         // if tasks[i].id does not match the value of taskId, task is kept
         if (tasks[i].id !== parseInt(taskId)) {
@@ -238,13 +231,13 @@ var deleteTask = function (taskId) {
         }
     }
 
-    // when updating task info all we have to to is overwrite the info, but to delete we have to create a new array of tasks that does not include the deleted task; reassign tasks array to be the same as updatedTaskArr
+    // when updating task info we only have to overwrite the info, but to delete we have to create a new array of tasks that does not include the deleted task; reassigns tasks array to values of updatedTaskArr
     tasks = updatedTaskArr;
 
     saveTasks()
 }
 
-// a function to handle the changing of options within the 'status' button
+// handles changing of options within the 'status' button
 var taskStatusChangeHandler = function (event) {
     // // 'event.target' is a reference to a 'select' element, meaning we can use additional DOM methods to get this element's properties
     // console.log(event.target);
@@ -252,13 +245,13 @@ var taskStatusChangeHandler = function (event) {
     // get the task item's id
     var taskId = event.target.getAttribute("data-task-id");
 
-    // get the currently selected option's value and convert to lowercase - this may help down the road if we ever change how the status text is displayed; this way we'll always check against the lowercase version, code-wise.
+    // gets currently-selected option's value and converts to lowercase - can help down the road if we ever change how the status text is displayed; this way we'll always check against the lowercase version, code-wise.
     var statusValue = event.target.value.toLowerCase();
 
-    // find the parent task item element based on the id
+    // finds parent task item element by id
     var taskSelected = document.querySelector(".task-item[data-task-id='" + taskId + "']");
 
-    // the following elements ('tasksToDoEl', 'tasksInProgressEl' and 'tasksCompletedEl') reference the <ul> elements created earlier; if user selects one of these from the dropdown, it will append the current task item to the <ul id="tasks-in-progress"> element with the 'tasksInProgressEl.appendChild(taskSelected)' method. Also note - using 'appendChild' here does not create a copy of the task, it moves the task from its original location in the DOM into the other <ul>. Also note - the 'taskSelected' didn't create a second <li>, it references an existing DOM element which we appended somewhere else.
+    // elements 'tasksToDoEl', 'tasksInProgressEl' and 'tasksCompletedEl', reference <ul> elements created earlier; if user selects one of these from the dropdown, it will append the current task item to the <ul id="tasks-in-progress"> element with the 'tasksInProgressEl.appendChild(taskSelected)' method. Also note - using 'appendChild' here does not create a copy of the task, it moves the task from its original location in the DOM into the other <ul>. Also note - the 'taskSelected' didn't create a second <li>, it references an existing DOM element which we appended somewhere else.
     if (statusValue === "to do") {
         tasksToDoEl.appendChild(taskSelected);
     }
@@ -269,7 +262,7 @@ var taskStatusChangeHandler = function (event) {
         tasksCompletedEl.appendChild(taskSelected);
     }
 
-    // upate task status in tasks array
+    // upates task status in tasks array
     for (var i = 0; i < tasks.length; i++) {
         if (tasks[i].id === parseInt(taskId)) {
             tasks[i].status = statusValue;
@@ -290,46 +283,46 @@ var dragTaskHandler = function (event) {
     // store the unique 'taskId' in the 'dataTransfer' property of the 'event' element using the 'setData' method, which takes two arguments: data format and data value.
     event.dataTransfer.setData("text/plain", taskId);
     var getId = event.dataTransfer.getData("text/plain");
-    // // testing to verify the 'data-task-id' is stored successfully in the 'dattaTransfer' property object, with taskId reporting the unique numerical ID and the type of taskId reporting 'string'; because the drag and drop actions are both of the type 'DragEvent', we can access their properties during dragging and later during dropping.
+    // // verifies that 'data-task-id' is stored successfully in the 'dattaTransfer' property object, with taskId reporting unique numerical ID and type of taskId reporting 'string'; because the drag and drop actions are both of the type 'DragEvent', we can access their properties during dragging and later during dropping.
     // console.log("getId:", getId, typeof getId);
 }
 
 var dropZoneDragHandler = function (event) {
-    // // verify that the dragover event listener is working and check which element is being targeted
+    // verifies dragover event listener is working and checks which element is being targeted
     // console.log("Dragover Event Target:", event.target);
-    // this limits the droppable area to be the task list or a child element thereof
+    // limits droppable area to the task list or a child element thereof
     var taskListEl = event.target.closest(".task-list");
     if (taskListEl) {
         event.preventDefault();
-        // // verify the drop area
+        // verifies drop area
         // console.dir(taskListEl);
 
-        // adding styling to the drop zone in order to signal to the user where the tasks can be placed
+        // adds styling to the drop zone in order to signal to the user where the tasks can be placed
         taskListEl.setAttribute("style", "background: rgba(68, 233, 255, 0.7); border-style: dashed;");
     }
 }
 
 var dropTaskHandler = function (event) {
-    // the 'data'task'id' value was stored in the 'dataTransfer' property using the 'setData' method, and now it is being retrieved using the 'getData' method
+    // 'data'task'id' value was stored in the 'dataTransfer' property using 'setData' method, and now retrieved using 'getData' method
     var id = event.dataTransfer.getData("text/plain");
-    // // testing to ensure the unique task id is identified and drop destination are identified properly
+    // // tests whether unique task id is identified and drop destination are identified properly
     // console.log("Drop Event Target:", event.target, event.dataTransfer, id);
     var draggableElement = document.querySelector("[data-task-id='" + id + "']");
-    // // using 'querySelector' method on 'data-task-id' attribute to locate dragged task item with unique task ID and then confirm that it is stored within the dataTransfer object
+    // // uses 'querySelector' method on 'data-task-id' attribute to locate dragged task item with unique task ID and confirms it is stored within the dataTransfer object
     // console.log(draggableElement);
     // console.dir(draggableElement);
-    // using 'closest' method to return corresponding task list element of the drop zone 
+    // uses 'closest' method to return corresponding task list element of the drop zone 
     var dropZoneEl = event.target.closest(".task-list");
-    // use 'id' property of task list element to retrieve 'id' attribute to and identify which task list was dropped on, to designate task status
+    // uses 'id' property of task list element to retrieve 'id' attribute to and identify which task list was dropped on, to designate task status
     var statusType = dropZoneEl.id;
     // console.log(statusType);
     // console.dir(dropZoneEl);
-    //set status of task based on dropZone id; note the use of 'draggableElement' rather than 'document' as the reference point of the 'querySelector' method; 'document' would choose the first of all task items in the DOM tree, rather than specifically the one that needs to change, which is the one that was dragged.
+    //sets status of task based on dropZone id; note the use of 'draggableElement' rather than 'document' as the reference point of the 'querySelector' method; 'document' would choose the first of all task items in the DOM tree, rather than the one that needs to change which is the one that was dragged.
     var statusSelectEl = draggableElement.querySelector("select[name='status-change']");
     // console.dir(statusSelectEl);
     // console.log(statusSelectEl);
 
-    // using 'selectedIndex' property to map the 'status' option to a list value by specifying the option's position in order to assign the appropriate status value.
+    // uses 'selectedIndex' property to map the 'status' option to a list value by specifying option's position in order to assign appropriate status value.
     if (statusType === "tasks-to-do") {
         statusSelectEl.selectedIndex = 0;
     }
@@ -344,7 +337,7 @@ var dropTaskHandler = function (event) {
     dropZoneEl.removeAttribute("style");
     dropZoneEl.appendChild(draggableElement);
 
-    //loop through tasks array to find and update task status
+    //loops through tasks array to find and update task status
     for (var i = 0; i < tasks.length; i++) {
         if (tasks[i].id === parseInt(id)) {
             tasks[i].status = statusSelectEl.value.toLowerCase();
@@ -353,7 +346,7 @@ var dropTaskHandler = function (event) {
     saveTasks()
 }
 
-// delegating dragLeave to the parent of the three task lists
+// delegates dragLeave to parent of the three task lists
 var dragLeaveHandler = function (event) {
     // // displays 'dragLeave' DOM element which stores every element that dragged task item has been dragged over but no longer actively dragged on 
     // console.dir(event.target);
@@ -364,38 +357,39 @@ var dragLeaveHandler = function (event) {
     }
 }
 
-// saving the packaged task info array to localStorage, which can only read strings, so data is converted via JavaScriptObjectNotation (JSON)
+// saves packaged task info array to localStorage (localStorage can only read strings, so data is converted via JavaScriptObjectNotation (JSON))
 var saveTasks = function () {
     localStorage.setItem("tasks", JSON.stringify(tasks));
 }
 
-// function to get tasks from localStorage, convert from string format back into an array of objects and iterates through tasks array to create the elements on the page
+// gets tasks from localStorage, converts from string format back into an array of objects and iterates through tasks array to create the elements on the page
 var loadTasks = function () {
-    // get tasks from localStorage and account for the condition where there are no saved tasks
+    // gets tasks from localStorage and accounts for instance of no saved tasks
     var savedTasks = localStorage.getItem("tasks");
     
     if (savedTasks === null) {
         return false;
     }
-    // convert from string to an array of objects
+    // converts from string to array of objects
     savedTasks = JSON.parse(savedTasks);
 
-    // iterate through tasks array to create elements on the page
+    // iterates through tasks array to create elements on the page
     for (var i = 0; i < savedTasks.length; i++) {
-    // pass each task object into the 'createTaskEl()' function
+    // passes each task object into the 'createTaskEl()' function
     createTaskEl(savedTasks[i]);
     }
 }
 
+
 formEl.addEventListener("submit", createFormHandler);
 
-// an event listener for the 'edit', 'delete' and 'status' buttons
+// event listener for 'edit', 'delete' and 'status' buttons
 pageContentEl.addEventListener("click", taskButtonHandler);
-// an event listener for the 'status' button options
+// event listener for 'status' button options
 pageContentEl.addEventListener("change", taskStatusChangeHandler);
-// an event listener to facilitate task drag-and-drop
+// event listener to facilitate task drag-and-drop
 pageContentEl.addEventListener("dragstart", dragTaskHandler);
-// an event listener for dragover event to <main>, the parent element of all three task lists. The 'dropZoneDragHandler' is passed as a callback if we included the () at the end it would immediately call the function.
+// event listener for dragover event to <main>, the parent element of all three task lists. The 'dropZoneDragHandler' is passed as a callback; if we included the () at the end it would immediately call the function.
 pageContentEl.addEventListener("dragover", dropZoneDragHandler);
 pageContentEl.addEventListener("drop", dropTaskHandler);
 pageContentEl.addEventListener("dragleave", dragLeaveHandler);
